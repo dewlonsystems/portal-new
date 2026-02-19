@@ -325,7 +325,8 @@
         <div class="header">
             <div class="company-branding">
                 <div class="logo-container">
-                    <img src="/logo.png" alt="Dewlon Systems Logo" onerror="this.style.display='none'">
+                    <!-- Logo: Use base64 or static path (WeasyPrint handles static with base_url) -->
+                    <img src="{% static 'logo.png' %}" alt="Dewlon Systems Logo" onerror="this.style.display='none'">
                 </div>
                 <h1 class="company-name">Dewlon Systems</h1>
                 <div class="company-details">
@@ -351,7 +352,7 @@
                 </div>
                 <div class="party-block">
                     <h3>Agreement Details</h3>
-                    <p><strong>Date:</strong> {{ contract.signed_at }}</p>
+                    <p><strong>Date:</strong> {{ contract.signed_at|date:"F j, Y" }}</p>
                     <p><strong>Location:</strong> {{ contract.place_of_signing }}</p>
                 </div>
             </div>
@@ -480,35 +481,42 @@
             <div class="signature-section">
                 <div class="signature-grid">
                     
-                    <!-- Client Signature (Dynamic - shows only if uploaded) -->
+                    <!-- Client Signature (User) - BASE64 EMBEDDED -->
                     <div class="signature-block">
                         <span class="signature-label">Signed by Client</span>
                         <div class="signature-line">
-                            {% if contract.signature_image %}
-                            <img src="{{ contract.signature_image }}" alt="Client Signature" class="signature-image">
+                            {% if user_signature_b64 %}
+                                <!-- ✅ Full base64 data URI from tasks.py -->
+                                <img src="{{ user_signature_b64 }}" alt="Client Signature" class="signature-image">
+                            {% else %}
+                                <!-- Fallback text if signature not available -->
+                                <span style="color: #999; font-style: italic; font-size: 0.9em; position: absolute; bottom: 5px; left: 0;">
+                                    Signature on file
+                                </span>
                             {% endif %}
                         </div>
                         <div class="sign-details">
                             <p><strong>Name:</strong> {{ contract.client_name }}</p>
-                            <p><strong>Date:</strong> {{ contract.signed_at }}</p>
+                            <p><strong>Date:</strong> {{ contract.signed_at|date:"F j, Y" }}</p>
                             <p><strong>Place:</strong> {{ contract.place_of_signing }}</p>
                         </div>
                     </div>
 
-                    <!-- Dewlon Systems Director Signature (PERMANENT - Always Visible) -->
+                    <!-- Dewlon Systems Director Signature - BASE64 EMBEDDED -->
                     <div class="signature-block">
                         <span class="signature-label">For Dewlon Systems</span>
                         <div class="signature-line">
-                            <!-- PDF-SAFE: Use base64 if provided by task, otherwise fallback to static -->
                             {% if director_signature_b64 %}
+                                <!-- ✅ Full base64 data URI from tasks.py -->
                                 <img src="{{ director_signature_b64 }}" alt="Director Signature" class="signature-image">
                             {% else %}
+                                <!-- Fallback: static path (may not work in PDF, but safe) -->
                                 <img src="{% static 'signatures/director-signature.png' %}" alt="Director Signature" class="signature-image">
                             {% endif %}
                         </div>
                         <div class="sign-details">
                             <p><strong>Name:</strong> Director, Dewlon Systems</p>
-                            <p><strong>Date:</strong> {{ contract.signed_at }}</p>
+                            <p><strong>Date:</strong> {{ contract.signed_at|date:"F j, Y" }}</p>
                             <p><strong>Place:</strong> Nairobi, Kenya</p>
                         </div>
                     </div>
