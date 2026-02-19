@@ -1,1 +1,96 @@
 .env
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+
+# =========================
+# Virtual Environment
+# =========================
+venv/
+env/
+ENV/
+.venv/
+
+# =========================
+# Environment Variables
+# =========================
+.env
+.env.*
+*.env
+
+# =========================
+# Django Stuff
+# =========================
+*.log
+logs/
+db.sqlite3
+db.sqlite3-journal
+
+# =========================
+# Media & User Uploads
+# =========================
+media/
+uploads/
+invoices/
+signatures/
+
+# =========================
+# Static Files (collected)
+# =========================
+staticfiles/
+static_root/
+
+# =========================
+# Gunicorn / UWSGI
+# =========================
+gunicorn.log
+*.pid
+
+# =========================
+# Celery
+# =========================
+celerybeat-schedule
+celerybeat.pid
+
+# =========================
+# Pytest / Coverage
+# =========================
+.pytest_cache/
+.coverage
+htmlcov/
+
+# =========================
+# IDE / Editor
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =========================
+# OS Files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Node (if frontend ever inside backend)
+# =========================
+node_modules/
+
+# =========================
+# Build / Distribution
+# =========================
+build/
+dist/
+*.egg-info/
+
+# =========================
+# Cache
+# =========================
+.cache/
