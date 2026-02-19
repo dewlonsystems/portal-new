@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.conf import settings
+from django.core.files.base import ContentFile
 from pathlib import Path
 import base64
 
