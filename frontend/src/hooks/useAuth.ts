@@ -1,7 +1,7 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { authService } from '@/services/authService';
-import { User, UserRole } from '@/types';
+
 
 export function useAuth() {
   const {
@@ -11,11 +11,9 @@ export function useAuth() {
     isAuthenticated,
     isLoading,
     error,
-    setUser,
     setLoading,
     setError,
     clearError,
-    logout,
     isAdmin,
     isStaff,
     hasRole,

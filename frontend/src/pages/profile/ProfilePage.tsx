@@ -1,6 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { UserCircleIcon, LockClosedIcon, KeyIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import { UserCircleIcon, LockClosedIcon, KeyIcon } from '@heroicons/react/24/outline';
 import { CheckCircleIcon as CheckCircleSolid, XCircleIcon as XCircleSolid } from '@heroicons/react/24/solid';
 
 export function ProfilePage() {
@@ -9,7 +9,7 @@ export function ProfilePage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [isStaff, setIsStaff] = useState(user?.role === 'STAFF');
+  const [isStaff] = useState(user?.role === 'STAFF');
   
   const [profileData, setProfileData] = useState({
     first_name: user?.first_name || '',
