@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h2>Invoice</h2>
+    <p>Hello {{ invoice.client_name }},</p>
+    <p>Please find attached invoice {{ invoice.reference_code }} for {{ invoice.service_description }}.</p>
+    <p><strong>Amount Due:</strong> {{ invoice.total_amount }}</p>
+    <p><strong>Due Date:</strong> {{ invoice.due_date|date:"Y-m-d H:i" }}</p>
+    <p>Please make payment before the due date to avoid any service interruption.</p>
+    <p>If you have any questions, please contact us.</p>
+    <p>Thank you for your business!</p>
+</body>
+</html>

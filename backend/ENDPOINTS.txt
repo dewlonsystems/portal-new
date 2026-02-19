@@ -1,0 +1,679 @@
+================================================================================
+PORTAL API ENDPOINTS DOCUMENTATION
+Version: 1.0.0
+Base URL: http://localhost:8000/api
+Authentication: Bearer JWT (except where noted)
+================================================================================
+
+================================================================================
+AUTHENTICATION ENDPOINTS
+================================================================================
+
+[POST] /auth/login/
+- Public (No Auth Required)
+- Description: User login with username/password, returns JWT tokens
+- Request Body:
+  {
+    "username": "admin",
+    "password": "your_password"
+  }
+- Success Response (200):
+  {
+    "refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+    "access": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+    "role": "ADMIN",
+    "must_change_password": false,
+    "first_name": "Admin"
+  }
+- Error Responses:
+  401: {"detail": "Invalid credentials"}
+  403: {"detail": "Account is temporarily locked due to multiple failed attempts."}
+
+[POST] /auth/refresh/
+- Public (No Auth Required)
+- Description: Refresh access token using refresh token
+- Request Body:
+  {
+    "refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+  }
+- Success Response (200):
+  {
+    "access": "new_access_token_here"
+  }
+
+================================================================================
+USERS ENDPOINTS
+================================================================================
+
+[GET] /users/list/
+- Auth: Admin Only
+- Description: List all users (Admin) or filtered list
+- Query Params: ?page=1&search=john&role=STAFF
+- Success Response (200): Paginated list of users
+
+[POST] /users/list/
+- Auth: Admin Only
+- Description: Create a new user (sends welcome email with temp password)
+- Request Body:
+  {
+    "username": "johndoe",
+    "email": "john@portal.com",
+    "first_name": "John",
+    "last_name": "Doe",
+    "phone_number": "+254712345678",
+    "role": "STAFF",
+    "password": "TempPass123!"
+  }
+- Success Response (201): Created user object
+
+[GET] /users/{id}/
+- Auth: Admin Only
+- Description: Retrieve specific user details
+- Success Response (200): User object
+
+[PUT] /users/{id}/
+- Auth: Admin Only
+- Description: Update user information
+- Request Body: Partial user fields to update
+- Success Response (200): Updated user object
+
+[DELETE] /users/{id}/
+- Auth: Admin Only
+- Description: Delete a user (soft delete via audit log)
+- Success Response (204): No content
+
+[GET] /users/profile/
+- Auth: Any Authenticated User
+- Description: Get current user's profile
+- Success Response (200): Current user object
+
+[PUT] /users/profile/
+- Auth: Any Authenticated User
+- Description: Update current user's profile (limited fields)
+- Request Body: {"first_name": "New", "last_name": "Name"}
+- Success Response (200): Updated profile
+
+[POST] /users/request-reset/
+- Auth: Any Authenticated User
+- Description: Staff requests password reset (notifies admins)
+- Request Body: {} (empty, uses authenticated user)
+- Success Response (201): {"id": 1, "user": 5, "requested_at": "..."}
+
+[PUT] /users/admin-reset/{id}/
+- Auth: Admin Only
+- Description: Admin resets a user's password (sends temp password email)
+- Request Body: {"admin_note": "Reset requested by user"}
+- Success Response (200): {"status": "Password reset initiated"}
+
+[PUT] /users/change-password/
+- Auth: Any Authenticated User
+- Description: Change own password (requires old password unless first login)
+- Request Body:
+  {
+    "old_password": "old_pass",  // Optional if must_change_password=true
+    "new_password": "NewPass123!"
+  }
+- Success Response (200): {"status": "Password updated"}
+
+================================================================================
+AUDIT ENDPOINTS
+================================================================================
+
+[GET] /audit/logs/
+- Auth: Admin Only
+- Description: List all audit logs (immutable)
+- Query Params: ?page=1&action=LOGIN&user=5&search=login
+- Success Response (200): Paginated list of audit logs
+
+[GET] /audit/logs/{id}/
+- Auth: Admin Only
+- Description: Retrieve specific audit log entry
+- Success Response (200): Audit log object
+
+[GET] /audit/sessions/
+- Auth: Admin Only
+- Description: List active user sessions
+- Query Params: ?page=1&user=5
+- Success Response (200): List of active sessions
+
+[GET] /audit/active-status/
+- Auth: Admin Only
+- Description: Get active status and last seen for all users
+- Success Response (200):
+  [
+    {
+      "user_id": 1,
+      "username": "admin",
+      "first_name": "Admin",
+      "last_name": "User",
+      "role": "ADMIN",
+      "is_active": true,
+      "last_seen": "2026-02-19T10:30:00Z"
+    }
+  ]
+
+[GET] /audit/my-logs/
+- Auth: Any Authenticated User
+- Description: Get audit logs for current user (Admin sees all, Staff sees own)
+- Success Response (200): Paginated list of relevant audit logs
+
+================================================================================
+PAYMENTS ENDPOINTS
+================================================================================
+
+[GET] /payments/list/
+- Auth: Any Authenticated User
+- Description: List transactions (Admin: all, Staff: own only)
+- Query Params: ?page=1&status=COMPLETED&payment_method=MPESA
+- Success Response (200): Paginated list of transactions
+
+[GET] /payments/{reference_code}/
+- Auth: Any Authenticated User (owner or admin)
+- Description: Get specific transaction details
+- Success Response (200): Transaction object with mpesa/paystack status
+
+[POST] /payments/initiate/
+- Auth: Any Authenticated User
+- Description: Initiate a new payment (Mpesa or Paystack)
+- Request Body:
+  {
+    "amount": 1500.00,
+    "payment_method": "MPESA",  // or "PAYSTACK"
+    "phone_number": "254712345678",  // Required for MPESA
+    "email": "user@example.com",     // Required for PAYSTACK
+    "description": "Payment for service"
+  }
+- Success Response (202):
+  {
+    "transaction": {...},
+    "message": "Mpesa STK push initiated. Please check your phone.",
+    "task_id": "celery_task_id"
+  }
+
+[GET] /payments/status/{reference_code}/
+- Auth: Any Authenticated User
+- Description: Poll transaction status (for frontend modal updates)
+- Success Response (200): Transaction with provider status details
+
+[POST] /payments/mpesa/callback/
+- Public (Webhook - No Auth)
+- Description: Mpesa STK callback handler (internal use)
+- Request Body: Mpesa callback JSON
+- Success Response (200): {"status": "success"}
+
+[POST] /payments/paystack/webhook/
+- Public (Webhook - No Auth)
+- Description: Paystack webhook handler (internal use)
+- Request Body: Paystack webhook JSON
+- Success Response (200): {"status": "success"}
+
+[GET] /payments/summary/
+- Auth: Any Authenticated User
+- Description: Get transaction summary (role-based totals)
+- Success Response (200):
+  {
+    "total_amount": "15000.00",
+    "total_transactions": 25,
+    "completed_transactions": 20,
+    "pending_transactions": 3,
+    "failed_transactions": 2
+  }
+
+[GET] /payments/ledger/
+- Auth: Admin Only
+- Description: List immutable ledger entries
+- Query Params: ?page=1&entry_type=CREDIT
+- Success Response (200): Paginated ledger entries
+
+================================================================================
+PAYOUTS ENDPOINTS (Admin Only)
+================================================================================
+
+[GET] /payouts/list/
+- Auth: Admin Only
+- Description: List all payout transactions
+- Query Params: ?page=1&status=COMPLETED
+- Success Response (200): Paginated payouts list
+
+[GET] /payouts/{id}/
+- Auth: Admin Only
+- Description: Get specific payout details
+- Success Response (200): Payout object
+
+[POST] /payouts/initiate/
+- Auth: Admin Only
+- Description: Initiate Mpesa B2C payout
+- Request Body:
+  {
+    "recipient_name": "John Doe",
+    "recipient_phone": "254712345678",
+    "amount": 500.00,
+    "reason": "Commission payment"
+  }
+- Success Response (202):
+  {
+    "payout": {...},
+    "message": "B2C payout initiated. Waiting for Mpesa confirmation.",
+    "task_id": "celery_task_id"
+  }
+
+[GET] /payouts/summary/
+- Auth: Admin Only
+- Description: Get payout summary statistics
+- Success Response (200):
+  {
+    "total_amount": "5000.00",
+    "total_payouts": 10,
+    "completed_payouts": 8,
+    "pending_payouts": 1,
+    "failed_payouts": 1
+  }
+
+[POST] /payouts/mpesa/b2c/result/
+- Public (Webhook - No Auth)
+- Description: Mpesa B2C result callback (internal use)
+- Request Body: Mpesa B2C callback JSON
+- Success Response (200): {"ResultCode": 0, "ResultDesc": "Accept"}
+
+[POST] /payouts/mpesa/b2c/timeout/
+- Public (Webhook - No Auth)
+- Description: Mpesa B2C timeout callback (internal use)
+- Success Response (200): {"ResultCode": 0, "ResultDesc": "Accept"}
+
+================================================================================
+QUOTES ENDPOINTS
+================================================================================
+
+[GET] /quotes/list/
+- Auth: Any Authenticated User
+- Description: List quotes (Admin: all, Staff: own only)
+- Query Params: ?page=1&status=SENT&client_name=John
+- Success Response (200): Paginated quotes list
+
+[GET] /quotes/{id}/
+- Auth: Any Authenticated User (owner or admin)
+- Description: Get specific quote details
+- Success Response (200): Quote object
+
+[POST] /quotes/create/
+- Auth: Any Authenticated User
+- Description: Create and send a quote (generates PDF + email)
+- Request Body:
+  {
+    "client_name": "Client Name",
+    "client_email": "client@example.com",
+    "client_phone": "254712345678",
+    "service_description": "Web development services",
+    "amount": 2500.00
+  }
+- Success Response (201): Created quote object
+
+[GET] /quotes/public/{reference_code}/
+- Public (No Auth)
+- Description: Public quote verification/view (for clients)
+- Success Response (200): Quote details (limited fields)
+
+================================================================================
+CONTRACTS ENDPOINTS
+================================================================================
+
+[GET] /contracts/list/
+- Auth: Any Authenticated User
+- Description: List contracts (Admin: all, Staff: own only)
+- Query Params: ?page=1&status=SIGNED
+- Success Response (200): Paginated contracts list
+
+[GET] /contracts/{id}/
+- Auth: Any Authenticated User (owner or admin)
+- Description: Get specific contract details
+- Success Response (200): Contract object
+
+[POST] /contracts/create/
+- Auth: Any Authenticated User
+- Description: Create and send contract (generates tokenized signing link)
+- Request Body:
+  {
+    "client_name": "Client Name",
+    "client_email": "client@example.com",
+    "client_phone": "254712345678",
+    "service_description": "Service agreement terms",
+    "amount": 5000.00
+  }
+- Success Response (201): Created contract object
+
+[GET] /contracts/sign/{token}/
+- Public (No Auth)
+- Description: Public contract signing page data (tokenized link)
+- Success Response (200): Contract details for signing
+
+[POST] /contracts/sign/{token}/submit/
+- Public (No Auth)
+- Description: Submit signed contract (signature + place)
+- Request Body:
+  {
+    "signature_image": "data:image/png;base64,iVBORw0KGgo...",
+    "place_of_signing": "Nairobi, Kenya"
+  }
+- Success Response (200): {"status": "Contract signed successfully"}
+
+[GET] /contracts/invoices/
+- Auth: Any Authenticated User
+- Description: List invoices generated from contracts
+- Success Response (200): Paginated invoices list
+
+[GET] /contracts/invoices/{id}/
+- Auth: Any Authenticated User
+- Description: Get specific invoice details
+- Success Response (200): Invoice object
+
+================================================================================
+INVOICES ENDPOINTS (Standalone)
+================================================================================
+
+[GET] /invoices/list/
+- Auth: Any Authenticated User
+- Description: List standalone invoices (Admin: all, Staff: own only)
+- Query Params: ?page=1&status=PENDING&due_date=2026-02-20
+- Success Response (200): Paginated invoices list
+
+[GET] /invoices/{id}/
+- Auth: Any Authenticated User (owner or admin)
+- Description: Get specific invoice details
+- Success Response (200): Invoice object
+
+[POST] /invoices/create/
+- Auth: Any Authenticated User
+- Description: Create a standalone invoice
+- Request Body:
+  {
+    "client_name": "Client Name",
+    "client_email": "client@example.com",
+    "client_phone": "254712345678",
+    "client_company": "Client Company Ltd",
+    "service_description": "Consulting services",
+    "amount": 3000.00,
+    "tax_amount": 480.00,
+    "due_date": "2026-02-22T23:59:59Z",
+    "notes": "Payment within 72 hours"
+  }
+- Success Response (201): Created invoice object
+
+[PUT] /invoices/{id}/status/
+- Auth: Any Authenticated User (owner or admin)
+- Description: Update invoice status (PAID/CANCELLED)
+- Request Body:
+  {
+    "status": "PAID",
+    "payment_reference": "TXN123456"
+  }
+- Success Response (200): Updated invoice object
+
+[POST] /invoices/{id}/send/
+- Auth: Any Authenticated User (owner or admin)
+- Description: Send invoice via email with PDF attachment
+- Success Response (200): {"status": "Invoice queued for sending"}
+
+[GET] /invoices/{id}/download/
+- Auth: Any Authenticated User (owner or admin)
+- Description: Download invoice PDF
+- Success Response (200): PDF file download
+
+[GET] /invoices/overdue/
+- Auth: Any Authenticated User
+- Description: Get list of overdue invoices (auto-marks as OVERDUE)
+- Success Response (200): List of overdue invoices
+
+================================================================================
+RECEIPTS ENDPOINTS
+================================================================================
+
+[GET] /receipts/list/
+- Auth: Any Authenticated User
+- Description: List receipts (Admin: all, Staff: own only)
+- Success Response (200): Paginated receipts list
+
+[GET] /receipts/{id}/
+- Auth: Any Authenticated User (owner or admin)
+- Description: Get specific receipt details
+- Success Response (200): Receipt object
+
+[POST] /receipts/generate/
+- Auth: Any Authenticated User
+- Description: Generate receipt PDF for a completed transaction
+- Request Body:
+  {
+    "transaction_id": 123
+  }
+- Success Response (201): Generated receipt object
+
+[GET] /receipts/{receipt_id}/download/
+- Auth: Any Authenticated User (owner or admin)
+- Description: Download receipt PDF
+- Success Response (200): PDF file download
+
+[POST] /receipts/{receipt_id}/email/
+- Auth: Any Authenticated User (owner or admin)
+- Description: Email receipt to client
+- Success Response (200): {"status": "Receipt email queued for sending"}
+
+[GET] /receipts/transaction/{transaction_id}/
+- Auth: Any Authenticated User
+- Description: Get receipt for a specific transaction
+- Success Response (200): Receipt object or 404 if not generated
+
+================================================================================
+VERIFICATION ENDPOINTS
+================================================================================
+
+[POST] /verification/check/
+- Public (No Auth)
+- Description: Verify document validity by reference code
+- Request Body:
+  {
+    "document_code": "DP5TG20VG1"
+  }
+- Success Response (200) - Valid:
+  {
+    "is_valid": true,
+    "document_type": "Payment Receipt",
+    "document_code": "DP5TG20VG1",
+    "date_of_issue": "2026-02-19T10:30:00Z",
+    "issuing_user": "johndoe",
+    "message": "Document is valid."
+  }
+- Success Response (200) - Invalid:
+  {
+    "is_valid": false,
+    "document_type": "Unknown",
+    "document_code": "INVALID123",
+    "date_of_issue": null,
+    "issuing_user": null,
+    "message": "Document not found or invalid."
+  }
+
+[GET] /verification/logs/
+- Auth: Any Authenticated User
+- Description: List verification attempts (for audit)
+- Success Response (200): Paginated verification logs
+
+================================================================================
+REPORTS ENDPOINTS (Dashboard & Analytics)
+================================================================================
+
+[GET] /reports/dashboard/summary/
+- Auth: Any Authenticated User
+- Description: Get dashboard summary metrics (role-based)
+- Success Response (200):
+  {
+    "total_revenue": "15000.00",
+    "total_transactions": 25,
+    "total_payouts": "5000.00",
+    "active_users": 12,
+    "pending_contracts": 3,
+    "overdue_invoices": 2
+  }
+
+[GET] /reports/dashboard/revenue-chart/
+- Auth: Any Authenticated User
+- Description: Get revenue data for charts (last N days)
+- Query Params: ?days=7
+- Success Response (200):
+  [
+    {"date": "2026-02-13", "amount": "1500.00", "transaction_count": 3},
+    {"date": "2026-02-14", "amount": "2300.00", "transaction_count": 5}
+  ]
+
+[GET] /reports/dashboard/weekly-trend/
+- Auth: Any Authenticated User
+- Description: Get weekly revenue trend with percentage change
+- Query Params: ?weeks=4
+- Success Response (200):
+  [
+    {"label": "2026-02-10", "value": "5000.00", "percentage_change": 12.5}
+  ]
+
+[GET] /reports/dashboard/user-activity/
+- Auth: Admin Only
+- Description: Get user activity metrics for charts
+- Query Params: ?days=7
+- Success Response (200):
+  [
+    {"date": "2026-02-19", "logins": 15, "transactions": 8, "contracts_signed": 2}
+  ]
+
+[GET] /reports/financial/summary/
+- Auth: Admin Only
+- Description: Get financial ledger summary
+- Success Response (200):
+  {
+    "total_credits": "50000.00",
+    "total_debits": "5000.00",
+    "net_balance": "45000.00",
+    "last_updated": "2026-02-19T10:30:00Z"
+  }
+
+[GET] /reports/reports/transactions/
+- Auth: Any Authenticated User
+- Description: Get detailed transaction report with filters
+- Query Params: ?start_date=2026-02-01&end_date=2026-02-19&status=COMPLETED&payment_method=MPESA
+- Success Response (200): Filtered transaction report with aggregations
+
+[GET] /reports/reports/user-performance/
+- Auth: Admin Only
+- Description: Get performance metrics for staff users
+- Success Response (200):
+  [
+    {
+      "user_id": 5,
+      "username": "johndoe",
+      "first_name": "John",
+      "last_name": "Doe",
+      "total_revenue": "8500.00",
+      "transaction_count": 12,
+      "contracts_signed": 5,
+      "quotes_sent": 8,
+      "last_login": "2026-02-19T09:00:00Z"
+    }
+  ]
+
+================================================================================
+NOTIFICATIONS ENDPOINTS
+================================================================================
+
+[GET] /notifications/list/
+- Auth: Any Authenticated User
+- Description: List user's notifications
+- Query Params: ?page=1&is_read=false
+- Success Response (200): Paginated notifications list
+
+[GET] /notifications/{id}/
+- Auth: Any Authenticated User
+- Description: Get specific notification details
+- Success Response (200): Notification object
+
+[POST] /notifications/{id}/mark-read/
+- Auth: Any Authenticated User
+- Description: Mark a notification as read
+- Success Response (200): {"status": "Notification marked as read"}
+
+[POST] /notifications/mark-all-read/
+- Auth: Any Authenticated User
+- Description: Mark all notifications as read
+- Success Response (200): {"status": "All notifications marked as read"}
+
+[GET] /notifications/unread-count/
+- Auth: Any Authenticated User
+- Description: Get count of unread notifications
+- Success Response (200): {"unread_count": 3}
+
+[GET] /notifications/admin/list/
+- Auth: Admin Only
+- Description: List admin-wide notifications
+- Success Response (200): Paginated admin notifications
+
+[GET] /notifications/admin/{id}/
+- Auth: Admin Only
+- Description: Get specific admin notification
+- Success Response (200): Admin notification object
+
+[POST] /notifications/admin/{id}/resolve/
+- Auth: Admin Only
+- Description: Resolve an admin notification
+- Success Response (200): {"status": "Notification resolved"}
+
+[POST] /notifications/admin/create/
+- Auth: Admin Only
+- Description: Create a new admin-wide notification
+- Request Body:
+  {
+    "notification_type": "SYSTEM_ALERT",
+    "title": "System Maintenance",
+    "message": "Scheduled maintenance on 2026-02-25",
+    "metadata": {"maintenance_date": "2026-02-25"}
+  }
+- Success Response (201): Created admin notification
+
+================================================================================
+REFERENCE CODE FORMATS
+================================================================================
+
+Transaction (Incoming):  DP + 8 alphanumeric  (e.g., DP5TG20VG1)
+Payout (Outgoing):      DD + 8 alphanumeric  (e.g., DD5HSTIF7G)
+Quote:                  DQ + 8 alphanumeric  (e.g., DQ4THSFS72)
+Contract:               DC + 8 alphanumeric  (e.g., DC8KL9MN2P)
+Invoice:                DV + 8 alphanumeric  (e.g., DVDG6ULF80)
+Receipt:                DR + 8 alphanumeric  (e.g., DR3XY7ZQ1M)
+Ledger Entry:           LE + 8 alphanumeric  (e.g., LE9AB2CD4E)
+
+================================================================================
+STATUS VALUES
+================================================================================
+
+Transaction/Payout: PENDING, PROCESSING, COMPLETED, FAILED, CANCELLED
+Contract: DRAFT, SENT, VIEWED, SIGNED, EXPIRED, CANCELLED
+Quote: DRAFT, SENT, VIEWED, ACCEPTED, REJECTED, EXPIRED
+Invoice: DRAFT, SENT, PENDING, PAID, OVERDUE, CANCELLED
+Receipt: GENERATED, DOWNLOADED, EMAIL_SENT
+
+================================================================================
+RATE LIMITING
+================================================================================
+
+Login Endpoint: 3 failed attempts per username → Account locked for 3 hours
+All other endpoints: Standard Django throttling (configurable)
+
+================================================================================
+WEBHOOK URLs (Configure in Mpesa/Paystack Dashboards)
+================================================================================
+
+Mpesa STK Callback:  {FRONTEND_URL}/api/payments/mpesa/callback/
+Paystack Webhook:    {FRONTEND_URL}/api/payments/paystack/webhook/
+Mpesa B2C Result:    {FRONTEND_URL}/api/payouts/mpesa/b2c/result/
+Mpesa B2C Timeout:   {FRONTEND_URL}/api/payouts/mpesa/b2c/timeout/
+
+Note: Replace {FRONTEND_URL} with your actual domain (e.g., https://portal.com)
+For local testing, use ngrok or similar to expose localhost.
+
+================================================================================
+END OF DOCUMENT
+================================================================================

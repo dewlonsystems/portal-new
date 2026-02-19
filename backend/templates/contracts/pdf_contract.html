@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Helvetica, sans-serif; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .details { margin-bottom: 20px; }
+        .signature { margin-top: 50px; border-top: 1px solid #000; width: 300px; }
+        img { max-width: 200px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>SERVICE AGREEMENT</h1>
+        <p>Contract Ref: {{ contract.reference_code }}</p>
+    </div>
+    <div class="details">
+        <p><strong>Client:</strong> {{ contract.client_name }}</p>
+        <p><strong>Email:</strong> {{ contract.client_email }}</p>
+        <p><strong>Service:</strong> {{ contract.service_description }}</p>
+        <p><strong>Amount:</strong> {{ contract.amount }}</p>
+        <p><strong>Date Signed:</strong> {{ contract.signed_at }}</p>
+        <p><strong>Place:</strong> {{ contract.place_of_signing }}</p>
+    </div>
+    <div class="signature">
+        <p>Signature:</p>
+        {% if contract.signature_image %}
+        <img src="{{ contract.signature_image.url }}" alt="Signature">
+        {% endif %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h2>Contract for Signature</h2>
+    <p>Hello {{ contract.client_name }},</p>
+    <p>Please review and sign the contract for {{ contract.service_description }}.</p>
+    <p>Amount: {{ contract.amount }}</p>
+    <p><a href="{{ signing_link }}">Click here to sign the contract</a></p>
+    <p>This link will expire on {{ contract.expires_at }}.</p>
+</body>
+</html>
