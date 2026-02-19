@@ -1,32 +1,476 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Agreement {{ contract.reference_code }} - Dewlon Systems</title>
     <style>
-        body { font-family: Helvetica, sans-serif; }
-        .header { text-align: center; margin-bottom: 20px; }
-        .details { margin-bottom: 20px; }
-        .signature { margin-top: 50px; border-top: 1px solid #000; width: 300px; }
-        img { max-width: 200px; }
+        /* --- COLOR PALETTE & VARIABLES --- */
+        :root {
+            --primary-green: #1A4D2E;    /* Deep Forest Green */
+            --secondary-cream: #F9F7F2;  /* Cream Background */
+            --accent-orange: #E67E22;    /* Burnt Orange */
+            --text-dark: #2C3E50;
+            --text-light: #546E7A;
+            --white: #FFFFFF;
+            --border-color: #E0E0E0;
+        }
+
+        /* --- GLOBAL STYLES --- */
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--secondary-cream);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 40px 20px;
+            line-height: 1.6;
+            font-size: 11pt; /* Slightly larger for legal readability */
+        }
+
+        /* --- THE DOCUMENT PAPER --- */
+        .document-paper {
+            max-width: 850px;
+            margin: 0 auto;
+            background: var(--white);
+            box-shadow: 0 10px 30px rgba(26, 77, 46, 0.15);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .document-paper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: var(--primary-green);
+        }
+
+        /* --- HEADER SECTION --- */
+        .header {
+            padding: 50px 50px 30px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid var(--primary-green);
+        }
+
+        .company-branding {
+            flex: 1;
+        }
+
+        .logo-container {
+            margin-bottom: 15px;
+        }
+
+        .logo-container img {
+            max-height: 70px;
+            width: auto;
+            display: block;
+        }
+
+        .company-name {
+            font-size: 1.6em;
+            font-weight: 700;
+            color: var(--primary-green);
+            margin: 0 0 5px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .company-details {
+            font-size: 0.85em;
+            color: var(--text-light);
+            margin: 0;
+        }
+
+        .document-title-block {
+            text-align: right;
+        }
+
+        .document-title {
+            font-size: 2.2em;
+            font-weight: 700;
+            color: var(--primary-green);
+            margin: 0;
+            line-height: 1.1;
+            text-transform: uppercase;
+        }
+
+        .contract-ref {
+            font-size: 1em;
+            color: var(--accent-orange);
+            font-weight: 600;
+            margin-top: 10px;
+            display: block;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        /* --- CONTENT CONTAINER --- */
+        .content-container {
+            padding: 40px 50px;
+        }
+
+        /* --- PARTIES SECTION --- */
+        .parties-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .party-block h3 {
+            font-size: 0.85em;
+            text-transform: uppercase;
+            color: var(--text-light);
+            letter-spacing: 1.5px;
+            margin-bottom: 10px;
+            border-bottom: 2px solid var(--accent-orange);
+            display: inline-block;
+        }
+
+        .party-block p {
+            margin: 5px 0;
+            font-size: 1em;
+        }
+
+        /* --- SCOPE OF WORK --- */
+        .scope-section {
+            background-color: var(--secondary-cream);
+            padding: 25px;
+            border-radius: 4px;
+            border-left: 5px solid var(--primary-green);
+            margin-bottom: 40px;
+        }
+
+        .scope-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        .scope-header h3 {
+            margin: 0;
+            color: var(--primary-green);
+            text-transform: uppercase;
+            font-size: 1.1em;
+        }
+
+        .scope-price {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .scope-text {
+            white-space: pre-line;
+            color: var(--text-dark);
+            line-height: 1.8;
+        }
+
+        /* --- TERMS AND CONDITIONS --- */
+        .terms-section {
+            margin-bottom: 40px;
+        }
+
+        .terms-section h2 {
+            font-size: 1.4em;
+            color: var(--primary-green);
+            border-bottom: 2px solid var(--primary-green);
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+        }
+
+        .term-item {
+            margin-bottom: 25px;
+            page-break-inside: avoid; /* Prevents splitting clauses across pages */
+        }
+
+        .term-title {
+            font-weight: 700;
+            color: var(--text-dark);
+            font-size: 1.05em;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .term-title::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-orange);
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .term-content {
+            color: var(--text-light);
+            font-size: 0.95em;
+            text-align: justify;
+            line-height: 1.7;
+            margin-left: 18px;
+        }
+
+        .term-content strong {
+            color: var(--text-dark);
+        }
+
+        /* --- SIGNATURES --- */
+        .signature-section {
+            margin-top: 60px;
+            padding-top: 20px;
+            border-top: 2px solid var(--primary-green);
+            page-break-inside: avoid;
+        }
+
+        .signature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            margin-top: 40px;
+        }
+
+        .signature-block {
+            position: relative;
+        }
+
+        .signature-label {
+            font-size: 0.85em;
+            text-transform: uppercase;
+            color: var(--text-light);
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .signature-line {
+            border-bottom: 2px solid var(--text-dark);
+            height: 70px;
+            position: relative;
+            margin-bottom: 10px;
+        }
+
+        .signature-image {
+            max-height: 60px;
+            width: auto;
+            position: absolute;
+            bottom: 5px;
+            left: 0;
+        }
+
+        .sign-details {
+            font-size: 0.85em;
+            color: var(--text-light);
+            margin-top: 5px;
+        }
+
+        /* --- FOOTER --- */
+        .footer-section {
+            background-color: var(--primary-green);
+            color: var(--white);
+            padding: 20px 50px;
+            text-align: center;
+            font-size: 0.8em;
+            margin-top: 40px;
+        }
+
+        .footer-section p {
+            margin: 5px 0;
+            opacity: 0.9;
+        }
+
+        /* --- PRINT OPTIMIZATION --- */
+        @media print {
+            body { 
+                background: none; 
+                padding: 0; 
+                -webkit-print-color-adjust: exact; 
+                font-size: 10pt;
+            }
+            .document-paper { 
+                box-shadow: none; 
+                border: none;
+                width: 100%;
+                max-width: 100%;
+                margin: 0;
+            }
+            .header, .content-container, .footer-section {
+                padding-left: 30px;
+                padding-right: 30px;
+            }
+            .term-item {
+                page-break-inside: avoid;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>SERVICE AGREEMENT</h1>
-        <p>Contract Ref: {{ contract.reference_code }}</p>
+
+    <div class="document-paper">
+        
+        <!-- HEADER -->
+        <div class="header">
+            <div class="company-branding">
+                <div class="logo-container">
+                    <img src="/logo.png" alt="Dewlon Systems Logo" onerror="this.style.display='none'">
+                </div>
+                <h1 class="company-name">Dewlon Systems</h1>
+                <div class="company-details">
+                    <p>Imara Daima, Nairobi, Kenya</p>
+                    <p>0728722746 &bull; contact@dewlons.com</p>
+                </div>
+            </div>
+
+            <div class="document-title-block">
+                <h2 class="document-title">Service<br>Agreement</h2>
+                <span class="contract-ref">REF: {{ contract.reference_code }}</span>
+            </div>
+        </div>
+
+        <div class="content-container">
+
+            <!-- PARTIES -->
+            <div class="parties-section">
+                <div class="party-block">
+                    <h3>The Client</h3>
+                    <p><strong>{{ contract.client_name }}</strong></p>
+                    <p>{{ contract.client_email }}</p>
+                </div>
+                <div class="party-block">
+                    <h3>Agreement Details</h3>
+                    <p><strong>Date:</strong> {{ contract.signed_at }}</p>
+                    <p><strong>Location:</strong> {{ contract.place_of_signing }}</p>
+                </div>
+            </div>
+
+            <!-- SCOPE OF WORK -->
+            <div class="scope-section">
+                <div class="scope-header">
+                    <h3>Scope of Services</h3>
+                    <span class="scope-price">Total: {{ contract.amount }}</span>
+                </div>
+                <div class="scope-text">{{ contract.service_description }}</div>
+            </div>
+
+            <!-- TERMS AND CONDITIONS -->
+            <div class="terms-section">
+                <h2>Terms and Conditions</h2>
+
+                <div class="term-item">
+                    <div class="term-title">1. Payment Terms</div>
+                    <div class="term-content">
+                        Invoices are issued upon agreement signing or milestone completion. Payment is due within <strong>72 hours</strong> of invoice receipt. 
+                        <br><br>
+                        <strong>Consequence of Breach:</strong> Failure to pay within the stipulated period will result in a late fee of 5% per week on the outstanding balance. Dewlon Systems reserves the right to suspend all services and withhold deliverables until full payment is received.
+                    </div>
+                </div>
+
+                <div class="term-item">
+                    <div class="term-title">2. Confidentiality</div>
+                    <div class="term-content">
+                        Both parties agree to keep all proprietary information, trade secrets, and business strategies shared during this engagement strictly confidential. This obligation survives the termination of this agreement for a period of 2 years.
+                        <br><br>
+                        <strong>Consequence of Breach:</strong> Any unauthorized disclosure of confidential information will be considered a material breach, subject to legal action and claims for damages resulting from the disclosure.
+                    </div>
+                </div>
+
+                <div class="term-item">
+                    <div class="term-title">3. Intellectual Property Rights</div>
+                    <div class="term-content">
+                        Upon full payment of all fees, the Client shall own all rights, title, and interest in the final deliverables produced by Dewlon Systems. Dewlon Systems retains the right to display the work in its portfolio and marketing materials unless otherwise agreed in writing.
+                        <br><br>
+                        <strong>Consequence of Breach:</strong> Use of deliverables prior to full payment constitutes copyright infringement. Dewlon Systems retains all IP rights until the invoice is settled in full.
+                    </div>
+                </div>
+
+                <div class="term-item">
+                    <div class="term-title">4. Termination of Service</div>
+                    <div class="term-content">
+                        Either party may terminate this agreement with a written notice of 7 days. In the event of termination by the Client, all work completed up to the termination date must be paid for at the pro-rated contract value.
+                        <br><br>
+                        <strong>Consequence of Breach:</strong> Immediate termination without notice by the Client without cause may result in a cancellation fee equivalent to 50% of the remaining contract value.
+                    </div>
+                </div>
+
+                <div class="term-item">
+                    <div class="term-title">5. Limitation of Liability</div>
+                    <div class="term-content">
+                        Dewlon Systems shall not be liable for any indirect, special, or consequential damages arising out of this agreement. Our total liability shall be limited to the total amount paid by the Client under this contract.
+                        <br><br>
+                        <strong>How it Works:</strong> This protects both parties from excessive claims unrelated to the direct scope of work.
+                    </div>
+                </div>
+
+                <div class="term-item">
+                    <div class="term-title">6. Force Majeure</div>
+                    <div class="term-content">
+                        Neither party shall be liable for failure to perform its obligations under this contract due to causes beyond its reasonable control, including but not limited to acts of God, war, internet infrastructure failure, or government regulations.
+                    </div>
+                </div>
+
+                <div class="term-item">
+                    <div class="term-title">7. Governing Law</div>
+                    <div class="term-content">
+                        This Agreement shall be governed by and construed in accordance with the <strong>Laws of Kenya</strong>. Any disputes arising from this agreement shall be resolved through amicable negotiation, failing which, through the courts of Nairobi.
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- SIGNATURES -->
+            <div class="signature-section">
+                <div class="signature-grid">
+                    
+                    <!-- Client Signature -->
+                    <div class="signature-block">
+                        <span class="signature-label">Signed by Client</span>
+                        <div class="signature-line">
+                            {% if contract.signature_image %}
+                            <img src="{{ contract.signature_image.url }}" alt="Client Signature" class="signature-image">
+                            {% endif %}
+                        </div>
+                        <div class="sign-details">
+                            <p><strong>Name:</strong> {{ contract.client_name }}</p>
+                            <p><strong>Date:</strong> {{ contract.signed_at }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Dewlon Systems Signature -->
+                    <div class="signature-block">
+                        <span class="signature-label">For Dewlon Systems</span>
+                        <div class="signature-line">
+                            <!-- AUTO-FILL TEMPLATE TARGET -->
+                            <img src="/dewlon-signature-placeholder.png" alt="Director Signature" class="signature-image" style="opacity: 0.5;">
+                        </div>
+                        <div class="sign-details">
+                            <p><strong>Name:</strong> Director, Dewlon Systems</p>
+                            <p><strong>Date:</strong> {{ contract.signed_at }}</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer-section">
+            <p><strong>Dewlon Systems</strong></p>
+            <p>Imara Daima, Nairobi | 0728722746 | contact@dewlons.com</p>
+            <p style="font-size: 0.75em; margin-top: 10px; opacity: 0.7;">This is a legally binding agreement. Please read all terms carefully before signing.</p>
+        </div>
+
     </div>
-    <div class="details">
-        <p><strong>Client:</strong> {{ contract.client_name }}</p>
-        <p><strong>Email:</strong> {{ contract.client_email }}</p>
-        <p><strong>Service:</strong> {{ contract.service_description }}</p>
-        <p><strong>Amount:</strong> {{ contract.amount }}</p>
-        <p><strong>Date Signed:</strong> {{ contract.signed_at }}</p>
-        <p><strong>Place:</strong> {{ contract.place_of_signing }}</p>
-    </div>
-    <div class="signature">
-        <p>Signature:</p>
-        {% if contract.signature_image %}
-        <img src="{{ contract.signature_image.url }}" alt="Signature">
-        {% endif %}
-    </div>
+
 </body>
 </html>

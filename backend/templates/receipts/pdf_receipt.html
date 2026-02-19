@@ -1,39 +1,353 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt {{ receipt.reference_code }} - Dewlon Systems</title>
     <style>
-        body { font-family: Helvetica, sans-serif; }
-        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
-        .details { margin-bottom: 20px; }
-        .total { font-size: 1.5em; font-weight: bold; text-align: right; margin-top: 20px; border-top: 2px solid #333; padding-top: 10px; }
-        .footer { margin-top: 50px; font-size: 0.8em; text-align: center; color: #666; }
-        .receipt-info { background: #f5f5f5; padding: 10px; margin-bottom: 20px; }
+        /* --- COLOR PALETTE & VARIABLES --- */
+        :root {
+            --primary-green: #1A4D2E;    /* Deep Forest Green */
+            --secondary-cream: #F9F7F2;  /* Cream Background */
+            --accent-orange: #E67E22;    /* Burnt Orange */
+            --text-dark: #2C3E50;
+            --text-light: #7F8C8D;
+            --white: #FFFFFF;
+            --success-green: #27ae60;
+        }
+
+        /* --- GLOBAL STYLES --- */
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--secondary-cream);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+
+        /* --- THE DOCUMENT PAPER --- */
+        .document-paper {
+            max-width: 850px;
+            margin: 0 auto;
+            background: var(--white);
+            box-shadow: 0 10px 30px rgba(26, 77, 46, 0.15);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .document-paper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: var(--primary-green);
+        }
+
+        /* --- HEADER SECTION --- */
+        .header {
+            padding: 50px 50px 30px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid #eee;
+        }
+
+        .company-branding {
+            flex: 1;
+        }
+
+        .logo-container {
+            margin-bottom: 20px;
+        }
+
+        .logo-container img {
+            max-height: 80px;
+            width: auto;
+            display: block;
+        }
+
+        .company-name {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: var(--primary-green);
+            margin: 0 0 10px 0;
+            letter-spacing: -0.5px;
+        }
+
+        .company-details {
+            font-size: 0.9em;
+            color: var(--text-light);
+            margin: 0;
+        }
+
+        .document-title-block {
+            text-align: right;
+        }
+
+        .document-title {
+            font-size: 3em;
+            font-weight: 300;
+            color: var(--primary-green);
+            margin: 0;
+            line-height: 1;
+            opacity: 0.9;
+            text-transform: uppercase;
+        }
+
+        .receipt-ref {
+            font-size: 1.1em;
+            color: var(--accent-orange);
+            font-weight: 600;
+            margin-top: 10px;
+            display: block;
+        }
+
+        /* --- SUCCESS BADGE --- */
+        .success-banner {
+            background-color: rgba(39, 174, 96, 0.1);
+            color: var(--success-green);
+            text-align: center;
+            padding: 15px;
+            font-weight: 700;
+            font-size: 1.1em;
+            border-bottom: 1px solid rgba(39, 174, 96, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* --- MAIN CONTENT GRID --- */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            padding: 40px 50px;
+        }
+
+        .section-label {
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-light);
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: block;
+            border-bottom: 2px solid var(--accent-orange);
+            width: fit-content;
+            padding-bottom: 5px;
+        }
+
+        .info-block p {
+            margin: 5px 0;
+            font-size: 1em;
+            color: var(--text-dark);
+        }
+
+        .info-block strong {
+            color: var(--primary-green);
+        }
+
+        /* --- AMOUNT DISPLAY --- */
+        .amount-section {
+            padding: 0 50px 40px 50px;
+            text-align: center;
+        }
+
+        .amount-card {
+            background: var(--primary-green);
+            color: var(--white);
+            display: inline-block;
+            padding: 30px 60px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(26, 77, 46, 0.3);
+        }
+
+        .amount-label {
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .amount-value {
+            font-size: 2.5em;
+            font-weight: 700;
+            display: block;
+        }
+
+        /* --- TRANSACTION DETAILS TABLE --- */
+        .transaction-details {
+            padding: 0 50px 40px 50px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 0.95em;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .detail-value {
+            color: var(--text-dark);
+            font-weight: 700;
+            text-align: right;
+        }
+
+        /* --- FOOTER --- */
+        .footer-section {
+            background-color: var(--primary-green);
+            color: var(--white);
+            padding: 30px 50px;
+            text-align: center;
+            font-size: 0.9em;
+        }
+
+        .footer-section p {
+            margin: 5px 0;
+            opacity: 0.9;
+        }
+
+        .footer-disclaimer {
+            font-size: 0.75em;
+            opacity: 0.7;
+            margin-top: 15px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* --- PRINT OPTIMIZATION --- */
+        @media print {
+            body { 
+                background: none; 
+                padding: 0; 
+                -webkit-print-color-adjust: exact; 
+            }
+            .document-paper { 
+                box-shadow: none; 
+                border: 1px solid #ddd;
+                width: 100%;
+                max-width: 100%;
+            }
+            .header, .content-grid, .amount-section, .transaction-details, .footer-section {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+            .amount-card {
+                box-shadow: none;
+                border: 2px solid var(--primary-green);
+                color: var(--primary-green);
+                background: none;
+            }
+            .amount-value {
+                color: var(--primary-green);
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>PAYMENT RECEIPT</h1>
-        <p>Receipt Ref: {{ receipt.reference_code }}</p>
-        <p>Transaction Ref: {{ transaction.reference_code }}</p>
+
+    <div class="document-paper">
+        
+        <!-- SUCCESS BANNER -->
+        <div class="success-banner">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Payment Successfully Received
+        </div>
+
+        <!-- HEADER -->
+        <div class="header">
+            <div class="company-branding">
+                <div class="logo-container">
+                    <!-- Ensure logo.png exists in your public folder -->
+                    <img src="/logo.png" alt="Dewlon Systems Logo" onerror="this.style.display='none'">
+                </div>
+                <h1 class="company-name">Dewlon Systems</h1>
+                <div class="company-details">
+                    <p>Imara Daima, Nairobi</p>
+                    <p>0728722746 &bull; contact@dewlons.com</p>
+                </div>
+            </div>
+
+            <div class="document-title-block">
+                <h2 class="document-title">Receipt</h2>
+                <span class="receipt-ref">#{{ receipt.reference_code }}</span>
+            </div>
+        </div>
+
+        <!-- PAYER & TRANSACTION INFO -->
+        <div class="content-grid">
+            <div class="info-block">
+                <span class="section-label">Paid By</span>
+                <p><strong>{{ user.first_name }} {{ user.last_name }}</strong></p>
+                <p>{{ user.email }}</p>
+                <p>{{ transaction.phone_number|default:user.phone_number }}</p>
+            </div>
+
+            <div class="info-block">
+                <span class="section-label">Transaction Info</span>
+                <p><strong>Date:</strong> {{ transaction.completed_at|date:"M d, Y H:i" }}</p>
+                <p><strong>Method:</strong> {{ transaction.payment_method }}</p>
+                <p><strong>Status:</strong> {{ transaction.status }}</p>
+            </div>
+        </div>
+
+        <!-- AMOUNT DISPLAY -->
+        <div class="amount-section">
+            <div class="amount-card">
+                <span class="amount-label">Total Amount Paid</span>
+                <span class="amount-value">{{ transaction.amount }}</span>
+            </div>
+        </div>
+
+        <!-- TRANSACTION DETAILS -->
+        <div class="transaction-details">
+            <span class="section-label">Payment Details</span>
+            
+            <div class="detail-row">
+                <span class="detail-label">Description</span>
+                <span class="detail-value">{{ transaction.description }}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Transaction Reference</span>
+                <span class="detail-value">{{ transaction.reference_code }}</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Receipt Generated</span>
+                <span class="detail-value">{{ receipt.generated_at|date:"Y-m-d H:i" }}</span>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer-section">
+            <p><strong>Dewlon Systems</strong></p>
+            <p>Imara Daima, Nairobi | 0728722746 | contact@dewlons.com</p>
+            <p class="footer-disclaimer">
+                This is an official computer-generated receipt. No signature is required. 
+                For any discrepancies, please contact our accounts department within 7 days.
+            </p>
+        </div>
+
     </div>
-    <div class="receipt-info">
-        <p><strong>Date:</strong> {{ transaction.completed_at|date:"Y-m-d H:i" }}</p>
-        <p><strong>Payment Method:</strong> {{ transaction.payment_method }}</p>
-        <p><strong>Status:</strong> {{ transaction.status }}</p>
-    </div>
-    <div class="details">
-        <p><strong>Payer:</strong> {{ user.first_name }} {{ user.last_name }}</p>
-        <p><strong>Email:</strong> {{ user.email }}</p>
-        <p><strong>Phone:</strong> {{ transaction.phone_number|default:user.phone_number }}</p>
-        <p><strong>Description:</strong> {{ transaction.description }}</p>
-    </div>
-    <div class="total">
-        <p>Amount Paid: {{ transaction.amount }}</p>
-    </div>
-    <div class="footer">
-        <p>This is an official receipt from Portal System.</p>
-        <p>Generated on {{ receipt.generated_at|date:"Y-m-d H:i" }}</p>
-        <p>Receipt ID: {{ receipt.reference_code }}</p>
-    </div>
+
 </body>
 </html>

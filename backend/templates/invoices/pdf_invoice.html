@@ -1,51 +1,478 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice {{ invoice.reference_code }} - Dewlon Systems</title>
     <style>
-        body { font-family: Helvetica, sans-serif; }
-        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
-        .details { margin-bottom: 20px; }
-        .totals { margin-top: 20px; text-align: right; }
-        .total-row { font-size: 1.2em; font-weight: bold; }
-        .footer { margin-top: 50px; font-size: 0.8em; text-align: center; color: #666; }
-        .invoice-info { background: #f5f5f5; padding: 10px; margin-bottom: 20px; }
+        /* --- COLOR PALETTE & VARIABLES --- */
+        :root {
+            --primary-green: #1A4D2E;    /* Deep Forest Green */
+            --secondary-cream: #F9F7F2;  /* Cream Background */
+            --accent-orange: #E67E22;    /* Burnt Orange */
+            --text-dark: #2C3E50;
+            --text-light: #7F8C8D;
+            --white: #FFFFFF;
+            --light-grey: #f4f4f4;
+        }
+
+        /* --- GLOBAL STYLES --- */
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--secondary-cream);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+
+        /* --- THE INVOICE PAPER --- */
+        .invoice-paper {
+            max-width: 850px;
+            margin: 0 auto;
+            background: var(--white);
+            box-shadow: 0 10px 30px rgba(26, 77, 46, 0.15);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .invoice-paper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: var(--primary-green);
+        }
+
+        /* --- HEADER SECTION --- */
+        .header {
+            padding: 50px 50px 30px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid #eee;
+        }
+
+        .company-branding {
+            flex: 1;
+        }
+
+        .logo-container {
+            margin-bottom: 20px;
+        }
+
+        .logo-container img {
+            max-height: 80px;
+            width: auto;
+            display: block;
+        }
+
+        .company-name {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: var(--primary-green);
+            margin: 0 0 10px 0;
+            letter-spacing: -0.5px;
+        }
+
+        .company-details {
+            font-size: 0.9em;
+            color: var(--text-light);
+            margin: 0;
+        }
+
+        .invoice-title-block {
+            text-align: right;
+        }
+
+        .invoice-title {
+            font-size: 3em;
+            font-weight: 300;
+            color: var(--primary-green);
+            margin: 0;
+            line-height: 1;
+            opacity: 0.9;
+        }
+
+        .invoice-ref {
+            font-size: 1.1em;
+            color: var(--accent-orange);
+            font-weight: 600;
+            margin-top: 10px;
+            display: block;
+        }
+
+        /* --- MAIN CONTENT GRID --- */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 50px;
+            padding: 40px 50px;
+        }
+
+        .section-label {
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-light);
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: block;
+            border-bottom: 2px solid var(--accent-orange);
+            width: fit-content;
+            padding-bottom: 5px;
+        }
+
+        .client-info p, .meta-info p {
+            margin: 5px 0;
+            font-size: 1em;
+            color: var(--text-dark);
+        }
+
+        .client-name {
+            font-weight: 700;
+            font-size: 1.2em;
+            color: var(--primary-green);
+        }
+
+        /* --- ITEMS TABLE --- */
+        .items-section {
+            padding: 0 50px 40px 50px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th {
+            text-align: left;
+            padding: 15px 10px;
+            background-color: var(--primary-green);
+            color: var(--white);
+            font-weight: 500;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        th:first-child { border-top-left-radius: 4px; }
+        th:last-child { border-top-right-radius: 4px; text-align: right; }
+
+        td {
+            padding: 20px 10px;
+            border-bottom: 1px solid #eee;
+            color: var(--text-dark);
+        }
+
+        td:last-child {
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .description-text {
+            display: block;
+            font-size: 0.95em;
+            margin-top: 5px;
+            color: var(--text-light);
+        }
+
+        /* --- TOTALS SECTION --- */
+        .totals-wrapper {
+            display: flex;
+            justify-content: flex-end;
+            padding: 0 50px 40px 50px;
+        }
+
+        .totals-box {
+            width: 320px;
+            background: #fafafa;
+            padding: 25px;
+            border-radius: 4px;
+            border: 1px solid #eee;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 0.95em;
+            color: var(--text-dark);
+        }
+
+        .total-row.final {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px solid var(--primary-green);
+            font-size: 1.4em;
+            font-weight: 700;
+            color: var(--primary-green);
+        }
+
+        .total-row.final span:last-child {
+            color: var(--accent-orange);
+        }
+
+        /* --- PAYMENT METHODS SECTION (NEW) --- */
+        .payment-section {
+            background-color: var(--secondary-cream);
+            padding: 30px 50px;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+        }
+
+        .payment-title {
+            font-size: 1.1em;
+            color: var(--primary-green);
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .payment-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .payment-card {
+            background: var(--white);
+            padding: 15px 20px;
+            border-radius: 4px;
+            border-left: 4px solid var(--accent-orange);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .payment-card h4 {
+            margin: 0 0 10px 0;
+            font-size: 0.9em;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .payment-detail {
+            margin: 5px 0;
+            font-size: 0.95em;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .payment-detail strong {
+            color: var(--text-dark);
+        }
+
+        .account-number {
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: 700;
+            color: var(--primary-green);
+            font-size: 1.1em;
+            background: #eee;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        /* --- FOOTER --- */
+        .footer-section {
+            background-color: var(--primary-green);
+            color: var(--white);
+            padding: 30px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9em;
+        }
+
+        .footer-left strong {
+            color: var(--accent-orange);
+            display: block;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+
+        .footer-right {
+            text-align: right;
+            opacity: 0.8;
+            font-size: 0.85em;
+        }
+
+        /* --- NOTES --- */
+        .notes-section {
+            padding: 20px 50px;
+            font-size: 0.9em;
+            color: #666;
+            background: #fff;
+        }
+
+        /* --- PRINT OPTIMIZATION --- */
+        @media print {
+            body { 
+                background: none; 
+                padding: 0; 
+                -webkit-print-color-adjust: exact; 
+            }
+            .invoice-paper { 
+                box-shadow: none; 
+                border: 1px solid #ddd;
+                width: 100%;
+                max-width: 100%;
+            }
+            .header, .content-grid, .items-section, .totals-wrapper, .payment-section, .footer-section, .notes-section {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>INVOICE</h1>
-        <p>Invoice Ref: {{ invoice.reference_code }}</p>
+
+    <div class="invoice-paper">
+        
+        <!-- HEADER -->
+        <div class="header">
+            <div class="company-branding">
+                <div class="logo-container">
+                    <!-- Ensure logo.png exists in your public folder -->
+                    <img src="/logo.png" alt="Dewlon Systems Logo" onerror="this.style.display='none'">
+                </div>
+                <h1 class="company-name">Dewlon Systems</h1>
+                <div class="company-details">
+                    <p>Imara Daima, Nairobi</p>
+                    <p>0728722746 &bull; contact@dewlons.com</p>
+                </div>
+            </div>
+
+            <div class="invoice-title-block">
+                <h2 class="invoice-title">INVOICE</h2>
+                <span class="invoice-ref">#{{ invoice.reference_code }}</span>
+            </div>
+        </div>
+
+        <!-- CLIENT & META INFO -->
+        <div class="content-grid">
+            <div class="client-info">
+                <span class="section-label">Bill To</span>
+                <p class="client-name">{{ invoice.client_name }}</p>
+                <p>{{ invoice.client_company }}</p>
+                <p>{{ invoice.client_email }}</p>
+                <p>{{ invoice.client_phone }}</p>
+            </div>
+
+            <div class="meta-info">
+                <span class="section-label">Details</span>
+                <p><strong>Issue Date:</strong> {{ invoice.created_at|date:"M d, Y" }}</p>
+                <p><strong>Due Date:</strong> {{ invoice.due_date|date:"M d, Y" }}</p>
+                <p><strong>Status:</strong> {{ invoice.status }}</p>
+            </div>
+        </div>
+
+        <!-- LINE ITEMS -->
+        <div class="items-section">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 80%">Description of Services</th>
+                        <th style="width: 20%; text-align: right;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            Professional Services
+                            <span class="description-text">{{ invoice.service_description }}</span>
+                        </td>
+                        <td>{{ invoice.amount }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- TOTALS -->
+        <div class="totals-wrapper">
+            <div class="totals-box">
+                <div class="total-row">
+                    <span>Subtotal</span>
+                    <span>{{ invoice.amount }}</span>
+                </div>
+                <div class="total-row">
+                    <span>Tax / VAT</span>
+                    <span>{{ invoice.tax_amount }}</span>
+                </div>
+                <div class="total-row final">
+                    <span>Total Due</span>
+                    <span>{{ invoice.total_amount }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAYMENT METHODS (NEW SECTION) -->
+        <div class="payment-section">
+            <div class="payment-title">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                Payment Methods
+            </div>
+            <div class="payment-grid">
+                <!-- Bank Details -->
+                <div class="payment-card">
+                    <h4>Bank Transfer</h4>
+                    <div class="payment-detail">
+                        <span>Bank:</span>
+                        <strong>I&M Bank</strong>
+                    </div>
+                    <div class="payment-detail">
+                        <span>Account Name:</span>
+                        <strong>Dewlon Systems</strong>
+                    </div>
+                    <div class="payment-detail">
+                        <span>Account No:</span>
+                        <span class="account-number">00404799506151</span>
+                    </div>
+                </div>
+
+                <!-- Mpesa Details -->
+                <div class="payment-card">
+                    <h4>M-Pesa</h4>
+                    <div class="payment-detail">
+                        <span>Type:</span>
+                        <strong>Buy Goods & Services</strong>
+                    </div>
+                    <div class="payment-detail">
+                        <span>Till Number:</span>
+                        <span class="account-number">8826954</span>
+                    </div>
+                    <div class="payment-detail">
+                        <span>Account Name:</span>
+                        <strong>Dewlon Systems</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer-section">
+            <div class="footer-left">
+                <strong>Payment Terms</strong>
+                Payment is due within 72 hours of invoice issue.<br>
+                Thank you for choosing Dewlon Systems.
+            </div>
+            <div class="footer-right">
+                Generated on {{ invoice.created_at|date:"Y-m-d H:i" }}
+            </div>
+        </div>
+
+        {% if invoice.notes %}
+        <div class="notes-section">
+            <strong>Notes:</strong> {{ invoice.notes }}
+        </div>
+        {% endif %}
+
     </div>
-    <div class="invoice-info">
-        <p><strong>Issue Date:</strong> {{ invoice.created_at|date:"Y-m-d" }}</p>
-        <p><strong>Due Date:</strong> {{ invoice.due_date|date:"Y-m-d H:i" }}</p>
-        <p><strong>Status:</strong> {{ invoice.status }}</p>
-    </div>
-    <div class="details">
-        <h3>Bill To:</h3>
-        <p><strong>{{ invoice.client_name }}</strong></p>
-        <p>{{ invoice.client_company }}</p>
-        <p>Email: {{ invoice.client_email }}</p>
-        <p>Phone: {{ invoice.client_phone }}</p>
-        <hr>
-        <p><strong>Service Description:</strong></p>
-        <p>{{ invoice.service_description }}</p>
-    </div>
-    <div class="totals">
-        <p>Subtotal: {{ invoice.amount }}</p>
-        <p>Tax: {{ invoice.tax_amount }}</p>
-        <p class="total-row">Total: {{ invoice.total_amount }}</p>
-    </div>
-    {% if invoice.notes %}
-    <div class="details" style="margin-top: 20px;">
-        <p><strong>Notes:</strong></p>
-        <p>{{ invoice.notes }}</p>
-    </div>
-    {% endif %}
-    <div class="footer">
-        <p>Payment is due within 72 hours of invoice issue.</p>
-        <p>Thank you for your business!</p>
-        <p>Portal System - Generated on {{ invoice.created_at|date:"Y-m-d H:i" }}</p>
-    </div>
+
 </body>
 </html>

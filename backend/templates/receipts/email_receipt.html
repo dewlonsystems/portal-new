@@ -1,13 +1,143 @@
 <!DOCTYPE html>
-<html>
-<body>
-    <h2>Payment Receipt</h2>
-    <p>Hello {{ user.first_name }},</p>
-    <p>Thank you for your payment. Please find attached your receipt.</p>
-    <p><strong>Receipt Reference:</strong> {{ receipt.reference_code }}</p>
-    <p><strong>Transaction Reference:</strong> {{ transaction.reference_code }}</p>
-    <p><strong>Amount:</strong> {{ transaction.amount }}</p>
-    <p><strong>Date:</strong> {{ transaction.completed_at }}</p>
-    <p>If you have any questions, please contact our support team.</p>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Receipt - Dewlon Systems</title>
+    <style>
+        /* --- RESET & CLIENT SPECIFIC FIXES --- */
+        body { margin: 0; padding: 0; background-color: #F9F7F2; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+        table { border-spacing: 0; border-collapse: collapse; }
+        td { padding: 0; }
+        img { border: 0; }
+        
+        /* --- MOBILE RESPONSIVENESS --- */
+        @media only screen and (max-width: 600px) {
+            .email-container { width: 100% !important; }
+            .content-padding { padding-left: 20px !important; padding-right: 20px !important; }
+            .mobile-stack { display: block !important; width: 100% !important; }
+            .mobile-center { text-align: center !important; }
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #F9F7F2; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
+
+    <!-- PREHEADER TEXT (Visible in inbox preview) -->
+    <div style="display: none; font-size: 1px; color: #F9F7F2; line-height: 1px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">
+        Payment successful. Receipt #{{ receipt.reference_code }} attached.
+    </div>
+
+    <center style="width: 100%; background-color: #F9F7F2;">
+        <table class="email-container" width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #FFFFFF; margin: 40px auto; border-radius: 4px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+            
+            <!-- TOP BRAND BAR -->
+            <tr>
+                <td height="8" style="background-color: #1A4D2E; font-size: 0; line-height: 0;">&nbsp;</td>
+            </tr>
+
+            <!-- HEADER / LOGO -->
+            <tr>
+                <td class="content-padding" style="padding: 40px 50px 30px 50px; text-align: center;">
+                    <!-- REPLACE WITH FULL URL FOR EMAIL COMPATIBILITY -->
+                    <img src="https://dewlons.com/logo.png" alt="Dewlon Systems" width="150" style="display: block; margin: 0 auto; max-width: 150px; height: auto;">
+                </td>
+            </tr>
+
+            <!-- HERO SECTION -->
+            <tr>
+                <td class="content-padding" style="padding: 0 50px 30px 50px; text-align: center;">
+                    <h1 style="margin: 0; font-size: 24px; font-weight: 700; color: #1A4D2E; text-transform: uppercase; letter-spacing: 1px;">Payment Received</h1>
+                    <p style="margin: 15px 0 0 0; font-size: 16px; color: #7F8C8D; line-height: 1.5;">
+                        Hello {{ user.first_name }},
+                    </p>
+                    <p style="margin: 10px 0 0 0; font-size: 16px; color: #2C3E50; line-height: 1.5;">
+                        Thank you for your payment. We have successfully received your funds. Please find your official receipt attached to this email.
+                    </p>
+                </td>
+            </tr>
+
+            <!-- TRANSACTION DETAILS BOX -->
+            <tr>
+                <td class="content-padding" style="padding: 0 50px 40px 50px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #F9F7F2; border-left: 4px solid #E67E22; border-radius: 4px;">
+                        <tr>
+                            <td style="padding: 25px;">
+                                <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                    <tr>
+                                        <td colspan="2" style="padding-bottom: 15px; border-bottom: 1px solid #E0E0E0;">
+                                            <span style="font-size: 12px; text-transform: uppercase; color: #7F8C8D; font-weight: 700; letter-spacing: 1px;">Transaction Summary</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td width="50%" style="padding-top: 15px; font-size: 14px; color: #7F8C8D;">Amount Paid</td>
+                                        <td width="50%" style="padding-top: 15px; font-size: 18px; font-weight: 700; color: #1A4D2E; text-align: right;">{{ transaction.amount }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td width="50%" style="padding-top: 10px; font-size: 14px; color: #7F8C8D;">Receipt Ref</td>
+                                        <td width="50%" style="padding-top: 10px; font-size: 14px; font-weight: 600; color: #2C3E50; text-align: right;">{{ receipt.reference_code }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td width="50%" style="padding-top: 10px; font-size: 14px; color: #7F8C8D;">Date</td>
+                                        <td width="50%" style="padding-top: 10px; font-size: 14px; font-weight: 600; color: #2C3E50; text-align: right;">{{ transaction.completed_at|date:"M d, Y" }}</td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+
+            <!-- CALL TO ACTION BUTTON -->
+            <tr>
+                <td class="content-padding" style="padding: 0 50px 40px 50px; text-align: center;">
+                    <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;">
+                        <tr>
+                            <td align="center" bgcolor="#1A4D2E" style="border-radius: 4px;">
+                                <a href="#" style="display: inline-block; padding: 14px 30px; font-size: 14px; font-weight: 700; color: #FFFFFF; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; border: 1px solid #1A4D2E;">Download Receipt PDF</a>
+                            </td>
+                        </tr>
+                    </table>
+                    <p style="margin: 15px 0 0 0; font-size: 12px; color: #95A5A6;">
+                        * Can't download? <a href="#" style="color: #E67E22; text-decoration: none;">View in Portal</a>
+                    </p>
+                </td>
+            </tr>
+
+            <!-- SUPPORT SECTION -->
+            <tr>
+                <td class="content-padding" style="padding: 30px 50px; background-color: #FAFAFA; border-top: 1px solid #EEEEEE; text-align: center;">
+                    <p style="margin: 0 0 10px 0; font-size: 14px; font-weight: 700; color: #1A4D2E;">Need Help?</p>
+                    <p style="margin: 0; font-size: 13px; color: #7F8C8D; line-height: 1.6;">
+                        If you have any questions about this transaction, please contact our support team.<br>
+                        <a href="mailto:contact@dewlons.com" style="color: #1A4D2E; text-decoration: none; font-weight: 600;">contact@dewlons.com</a> 
+                        | 
+                        <a href="tel:0728722746" style="color: #1A4D2E; text-decoration: none; font-weight: 600;">0728722746</a>
+                    </p>
+                </td>
+            </tr>
+
+            <!-- FOOTER -->
+            <tr>
+                <td style="padding: 30px 50px; background-color: #1A4D2E; text-align: center;">
+                    <p style="margin: 0 0 10px 0; font-size: 14px; font-weight: 700; color: #FFFFFF;">Dewlon Systems</p>
+                    <p style="margin: 0 0 20px 0; font-size: 12px; color: #BDC3C7; line-height: 1.5;">
+                        Imara Daima, Nairobi, Kenya
+                    </p>
+                    <p style="margin: 0; font-size: 11px; color: #7F8C8D;">
+                        &copy; {{ now|date:"Y" }} Dewlon Systems. All rights reserved.<br>
+                        You are receiving this email because you made a purchase with us.
+                    </p>
+                </td>
+            </tr>
+
+        </table>
+        
+        <!-- SPACER FOR BOTTOM -->
+        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+                <td height="40" style="font-size: 0; line-height: 0;">&nbsp;</td>
+            </tr>
+        </table>
+    </center>
 </body>
 </html>
