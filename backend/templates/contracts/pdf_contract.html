@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,9 +8,9 @@
     <style>
         /* --- COLOR PALETTE & VARIABLES --- */
         :root {
-            --primary-green: #1A4D2E;    /* Deep Forest Green */
-            --secondary-cream: #F9F7F2;  /* Cream Background */
-            --accent-orange: #E67E22;    /* Burnt Orange */
+            --primary-green: #1A4D2E;
+            --secondary-cream: #F9F7F2;
+            --accent-orange: #E67E22;
             --text-dark: #2C3E50;
             --text-light: #546E7A;
             --white: #FFFFFF;
@@ -24,7 +25,7 @@
             margin: 0;
             padding: 40px 20px;
             line-height: 1.6;
-            font-size: 11pt; /* Slightly larger for legal readability */
+            font-size: 10.5pt;
         }
 
         /* --- THE DOCUMENT PAPER --- */
@@ -190,15 +191,15 @@
         }
 
         .term-item {
-            margin-bottom: 25px;
-            page-break-inside: avoid; /* Prevents splitting clauses across pages */
+            margin-bottom: 22px;
+            page-break-inside: avoid;
         }
 
         .term-title {
             font-weight: 700;
             color: var(--text-dark);
-            font-size: 1.05em;
-            margin-bottom: 8px;
+            font-size: 1em;
+            margin-bottom: 6px;
             display: flex;
             align-items: center;
         }
@@ -206,28 +207,30 @@
         .term-title::before {
             content: '';
             display: inline-block;
-            width: 8px;
-            height: 8px;
+            width: 7px;
+            height: 7px;
             background-color: var(--accent-orange);
             border-radius: 50%;
-            margin-right: 10px;
+            margin-right: 9px;
+            flex-shrink: 0;
         }
 
         .term-content {
             color: var(--text-light);
-            font-size: 0.95em;
+            font-size: 0.93em;
             text-align: justify;
-            line-height: 1.7;
-            margin-left: 18px;
+            line-height: 1.65;
+            margin-left: 16px;
         }
 
         .term-content strong {
             color: var(--text-dark);
+            font-weight: 600;
         }
 
         /* --- SIGNATURES --- */
         .signature-section {
-            margin-top: 60px;
+            margin-top: 50px;
             padding-top: 20px;
             border-top: 2px solid var(--primary-green);
             page-break-inside: avoid;
@@ -295,7 +298,7 @@
                 background: none; 
                 padding: 0; 
                 -webkit-print-color-adjust: exact; 
-                font-size: 10pt;
+                font-size: 9.5pt;
             }
             .document-paper { 
                 box-shadow: none; 
@@ -362,66 +365,112 @@
                 <div class="scope-text">{{ contract.service_description }}</div>
             </div>
 
-            <!-- TERMS AND CONDITIONS -->
+            <!-- TERMS AND CONDITIONS (15 Comprehensive Clauses) -->
             <div class="terms-section">
                 <h2>Terms and Conditions</h2>
 
                 <div class="term-item">
-                    <div class="term-title">1. Payment Terms</div>
+                    <div class="term-title">1. Definitions and Interpretation</div>
                     <div class="term-content">
-                        Invoices are issued upon agreement signing or milestone completion. Payment is due within <strong>72 hours</strong> of invoice receipt. 
-                        <br><br>
-                        <strong>Consequence of Breach:</strong> Failure to pay within the stipulated period will result in a late fee of 5% per week on the outstanding balance. Dewlon Systems reserves the right to suspend all services and withhold deliverables until full payment is received.
+                        In this Agreement, unless the context otherwise requires: "Client" refers to the individual or entity signing this contract; "Provider" refers to Dewlon Systems, a company registered under the laws of Kenya; "Services" means the professional services described in the Scope of Services section; "Effective Date" is the date this Agreement is fully executed by both parties. Headings are for convenience only and do not affect interpretation. References to statutory provisions include amendments and re-enactments.
                     </div>
                 </div>
 
                 <div class="term-item">
-                    <div class="term-title">2. Confidentiality</div>
+                    <div class="term-title">2. Scope of Services</div>
                     <div class="term-content">
-                        Both parties agree to keep all proprietary information, trade secrets, and business strategies shared during this engagement strictly confidential. This obligation survives the termination of this agreement for a period of 2 years.
-                        <br><br>
-                        <strong>Consequence of Breach:</strong> Any unauthorized disclosure of confidential information will be considered a material breach, subject to legal action and claims for damages resulting from the disclosure.
+                        The Provider agrees to deliver the Services described in the Scope of Services section with reasonable skill, care, and diligence, in accordance with industry standards and applicable laws. Any additional services requested by the Client beyond the agreed scope shall be subject to a separate written agreement and additional fees. The Provider reserves the right to subcontract portions of the Services with prior written notice to the Client, provided that the Provider remains liable for the performance of any subcontractor.
                     </div>
                 </div>
 
                 <div class="term-item">
-                    <div class="term-title">3. Intellectual Property Rights</div>
+                    <div class="term-title">3. Payment Terms</div>
                     <div class="term-content">
-                        Upon full payment of all fees, the Client shall own all rights, title, and interest in the final deliverables produced by Dewlon Systems. Dewlon Systems retains the right to display the work in its portfolio and marketing materials unless otherwise agreed in writing.
-                        <br><br>
-                        <strong>Consequence of Breach:</strong> Use of deliverables prior to full payment constitutes copyright infringement. Dewlon Systems retains all IP rights until the invoice is settled in full.
+                        The Client agrees to pay the total amount specified in the Scope of Services within seventy-two (72) hours of invoice receipt. Payment shall be made via the agreed method (bank transfer, mobile money, or card payment). Late payments shall incur interest at a rate of 2% per month or the maximum rate permitted by law, whichever is lower. The Provider reserves the right to suspend Services until all outstanding invoices are settled in full. All fees are exclusive of applicable taxes unless otherwise stated.
                     </div>
                 </div>
 
                 <div class="term-item">
-                    <div class="term-title">4. Termination of Service</div>
+                    <div class="term-title">4. Commencement and Delivery</div>
                     <div class="term-content">
-                        Either party may terminate this agreement with a written notice of 7 days. In the event of termination by the Client, all work completed up to the termination date must be paid for at the pro-rated contract value.
-                        <br><br>
-                        <strong>Consequence of Breach:</strong> Immediate termination without notice by the Client without cause may result in a cancellation fee equivalent to 50% of the remaining contract value.
+                        Services shall commence only after (a) this Agreement is fully executed by both parties, (b) the initial payment or deposit is received and confirmed, and (c) the Client has provided all necessary information, access, and materials required for service delivery. The Provider shall use commercially reasonable efforts to meet agreed timelines but does not guarantee specific delivery dates unless expressly stated in writing. Time is not of the essence unless explicitly agreed in writing.
                     </div>
                 </div>
 
                 <div class="term-item">
-                    <div class="term-title">5. Limitation of Liability</div>
+                    <div class="term-title">5. Client Obligations</div>
                     <div class="term-content">
-                        Dewlon Systems shall not be liable for any indirect, special, or consequential damages arising out of this agreement. Our total liability shall be limited to the total amount paid by the Client under this contract.
-                        <br><br>
-                        <strong>How it Works:</strong> This protects both parties from excessive claims unrelated to the direct scope of work.
+                        The Client agrees to: (a) provide accurate and complete information necessary for service delivery; (b) respond to Provider inquiries within reasonable timeframes; (c) grant necessary access to systems, accounts, or premises as required; (d) designate a single point of contact for project coordination; and (e) comply with all applicable laws and regulations in their use of the Services. Failure to meet these obligations may result in delays for which the Provider is not liable, and may constitute grounds for termination under Clause 10.
                     </div>
                 </div>
 
                 <div class="term-item">
-                    <div class="term-title">6. Force Majeure</div>
+                    <div class="term-title">6. Intellectual Property Rights</div>
                     <div class="term-content">
-                        Neither party shall be liable for failure to perform its obligations under this contract due to causes beyond its reasonable control, including but not limited to acts of God, war, internet infrastructure failure, or government regulations.
+                        All intellectual property created by the Provider in the course of delivering Services, including but not limited to designs, code, documentation, reports, and methodologies, shall remain the exclusive property of the Provider until full payment is received. Upon full payment, the Client receives a non-exclusive, non-transferable, perpetual license to use the deliverables for their intended business purpose. Pre-existing intellectual property of either party remains their sole property and is not transferred under this Agreement.
                     </div>
                 </div>
 
                 <div class="term-item">
-                    <div class="term-title">7. Governing Law</div>
+                    <div class="term-title">7. Confidentiality</div>
                     <div class="term-content">
-                        This Agreement shall be governed by and construed in accordance with the <strong>Laws of Kenya</strong>. Any disputes arising from this agreement shall be resolved through amicable negotiation, failing which, through the courts of Nairobi.
+                        Both parties agree to maintain the confidentiality of all proprietary information disclosed during the engagement, including business strategies, technical data, customer lists, financial information, and trade secrets. Confidential information shall not be disclosed to third parties without prior written consent, except as required by law or regulatory authority. This obligation survives termination of this Agreement for a period of three (3) years. Each party shall implement reasonable security measures to protect confidential information from unauthorized access or disclosure.
+                    </div>
+                </div>
+
+                <div class="term-item">
+                    <div class="term-title">8. Data Protection and Privacy</div>
+                    <div class="term-content">
+                        The Provider shall process any personal data provided by the Client in accordance with the Kenya Data Protection Act, 2019, and applicable international standards including GDPR where relevant. The Client warrants that they have obtained all necessary consents for sharing personal data with the Provider and that such data is accurate and up to date. Both parties agree to implement appropriate technical and organizational measures to protect data against unauthorized access, loss, alteration, or destruction. Data processing agreements shall be executed separately where required by law.
+                    </div>
+                </div>
+
+                <div class="term-item">
+                    <div class="term-title">9. Limitation of Liability</div>
+                    <div class="term-content">
+                        To the maximum extent permitted by law, the Provider shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including but not limited to loss of profits, revenue, data, goodwill, or business opportunities, arising from or related to this Agreement. The Provider total aggregate liability under this Agreement shall not exceed the total fees paid by the Client under this Agreement in the twelve (12) months preceding the claim. This limitation does not apply to liability for gross negligence, willful misconduct, breach of confidentiality obligations, or infringement of intellectual property rights.
+                    </div>
+                </div>
+
+                <div class="term-item">
+                    <div class="term-title">10. Term and Termination</div>
+                    <div class="term-content">
+                        This Agreement commences on the Effective Date and continues until completion of the Services, unless terminated earlier. Either party may terminate this Agreement with seven (7) days written notice for material breach by the other party, provided the breach remains uncured after the notice period. The Provider may terminate immediately for non-payment exceeding fourteen (14) days. Upon termination, the Client shall pay for all Services rendered and reasonable expenses incurred up to the termination date. Sections 6, 7, 8, 9, 12, 13, and 15 shall survive termination.
+                    </div>
+                </div>
+
+                <div class="term-item">
+                    <div class="term-title">11. Force Majeure</div>
+                    <div class="term-content">
+                        Neither party shall be liable for failure or delay in performing obligations under this Agreement due to circumstances beyond their reasonable control, including but not limited to acts of God, war, civil unrest, government actions, pandemics, natural disasters, widespread infrastructure failures, or internet service disruptions. The affected party shall notify the other promptly in writing and use reasonable efforts to mitigate the impact and resume performance. If the force majeure event continues for more than thirty (30) days, either party may terminate this Agreement without liability.
+                    </div>
+                </div>
+
+                <div class="term-item">
+                    <div class="term-title">12. Dispute Resolution</div>
+                    <div class="term-content">
+                        Any dispute arising from this Agreement shall first be addressed through good-faith negotiation between designated representatives of the parties within fourteen (14) days of written notice. If unresolved, the dispute shall be submitted to mediation under the rules of the Chartered Institute of Arbitrators, Kenya Branch, with costs shared equally. If mediation fails within thirty (30) days, the dispute shall be finally resolved by binding arbitration in Nairobi, Kenya, under the Arbitration Act of Kenya. The arbitral award shall be final and enforceable in any court of competent jurisdiction. Each party bears its own legal costs unless the arbitrator awards otherwise.
+                    </div>
+                </div>
+
+                <div class="term-item">
+                    <div class="term-title">13. Governing Law and Jurisdiction</div>
+                    <div class="term-content">
+                        This Agreement shall be governed by and construed in accordance with the laws of the Republic of Kenya, without regard to its conflict of laws principles. The parties submit to the exclusive jurisdiction of the courts of Kenya for any matters not subject to arbitration under Clause 12. Any legal notices shall be sent to the addresses provided during contract execution or as subsequently updated in writing via email with read receipt or registered post. Changes to contact details must be communicated in writing to remain effective.
+                    </div>
+                </div>
+
+                <div class="term-item">
+                    <div class="term-title">14. Amendments and Entire Agreement</div>
+                    <div class="term-content">
+                        This Agreement constitutes the entire understanding between the parties regarding the subject matter and supersedes all prior discussions, proposals, quotations, or agreements, whether oral or written. Any amendment, modification, or waiver of any provision must be in writing, signed by authorized representatives of both parties, and expressly reference this Agreement. No failure or delay by either party in exercising any right shall operate as a waiver. No waiver of any provision shall be effective unless in writing and signed by the waiving party, and shall be limited to the specific instance and purpose stated.
+                    </div>
+                </div>
+
+                <div class="term-item">
+                    <div class="term-title">15. Electronic Signatures and Counterparts</div>
+                    <div class="term-content">
+                        The parties acknowledge that electronic signatures, including digital images of handwritten signatures, typed names, or click-to-sign mechanisms, are legally binding under the Kenya Information and Communications Act and the Electronic Transactions Act. This Agreement may be executed in counterparts, each of which shall be deemed an original, and all of which together constitute one instrument. Transmission of a signed copy by email, secure electronic signature platform, or other electronic means shall be sufficient to evidence execution. The parties waive any requirement for physical signature or exchange of original documents.
                     </div>
                 </div>
 
@@ -431,30 +480,36 @@
             <div class="signature-section">
                 <div class="signature-grid">
                     
-                    <!-- Client Signature -->
+                    <!-- Client Signature (Dynamic - shows only if uploaded) -->
                     <div class="signature-block">
                         <span class="signature-label">Signed by Client</span>
                         <div class="signature-line">
                             {% if contract.signature_image %}
-                            <img src="{{ contract.signature_image.url }}" alt="Client Signature" class="signature-image">
+                            <img src="{{ contract.signature_image }}" alt="Client Signature" class="signature-image">
                             {% endif %}
                         </div>
                         <div class="sign-details">
                             <p><strong>Name:</strong> {{ contract.client_name }}</p>
                             <p><strong>Date:</strong> {{ contract.signed_at }}</p>
+                            <p><strong>Place:</strong> {{ contract.place_of_signing }}</p>
                         </div>
                     </div>
 
-                    <!-- Dewlon Systems Signature -->
+                    <!-- Dewlon Systems Director Signature (PERMANENT - Always Visible) -->
                     <div class="signature-block">
                         <span class="signature-label">For Dewlon Systems</span>
                         <div class="signature-line">
-                            <!-- AUTO-FILL TEMPLATE TARGET -->
-                            <img src="/dewlon-signature-placeholder.png" alt="Director Signature" class="signature-image" style="opacity: 0.5;">
+                            <!-- PDF-SAFE: Use base64 if provided by task, otherwise fallback to static -->
+                            {% if director_signature_b64 %}
+                                <img src="{{ director_signature_b64 }}" alt="Director Signature" class="signature-image">
+                            {% else %}
+                                <img src="{% static 'signatures/director-signature.png' %}" alt="Director Signature" class="signature-image">
+                            {% endif %}
                         </div>
                         <div class="sign-details">
                             <p><strong>Name:</strong> Director, Dewlon Systems</p>
                             <p><strong>Date:</strong> {{ contract.signed_at }}</p>
+                            <p><strong>Place:</strong> Nairobi, Kenya</p>
                         </div>
                     </div>
 
@@ -467,7 +522,7 @@
         <div class="footer-section">
             <p><strong>Dewlon Systems</strong></p>
             <p>Imara Daima, Nairobi | 0728722746 | contact@dewlons.com</p>
-            <p style="font-size: 0.75em; margin-top: 10px; opacity: 0.7;">This is a legally binding agreement. Please read all terms carefully before signing.</p>
+            <p style="font-size: 0.75em; margin-top: 10px; opacity: 0.7;">This is a legally binding agreement. Electronic signatures are valid under Kenyan law.</p>
         </div>
 
     </div>

@@ -6,7 +6,7 @@ import path from 'path'
 export default defineConfig({
   plugins: [
     react(),
-    tailwindcss(),  // <-- Tailwind v4 Vite Plugin
+    tailwindcss(),
   ],
   resolve: {
     alias: {
@@ -17,9 +17,9 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:8000',
+        target: 'https://account.dewlons.com',
         changeOrigin: true,
-        secure: false,
+        secure: true,
       }
     }
   },

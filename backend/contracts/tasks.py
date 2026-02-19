@@ -2,12 +2,44 @@ from celery import shared_task
 from django.core.mail import EmailMessage
 from django.conf import settings
 from django.template.loader import render_to_string
-from weasyprint import HTML
+from weasyprint import HTML, CSS
+from weasyprint.urls import path2url
 import os
+from pathlib import Path
+import base64
 from .models import Contract, Invoice
 from datetime import timedelta
 from django.utils import timezone
-import base64
+from audit.tasks import log_action
+
+
+def get_director_signature_base64():
+    """
+    Convert the static director signature PNG to base64 data URI.
+    Returns None if file not found (template will fallback).
+    """
+    try:
+        # Try multiple possible locations for the static file
+        possible_paths = [
+            Path(settings.BASE_DIR) / "static" / "signatures" / "director-signature.png",
+            Path(settings.STATIC_ROOT) / "signatures" / "director-signature.png" if hasattr(settings, 'STATIC_ROOT') else None,
+            Path(settings.BASE_DIR) / "contracts" / "static" / "signatures" / "director-signature.png",
+        ]
+        
+        for sig_path in possible_paths:
+            if sig_path and sig_path.exists():
+                with open(sig_path, 'rb') as f:
+                    encoded = base64.b64encode(f.read()).decode('utf-8')
+                    return f'image/png;base64,{encoded}'
+        
+        # If not found, log warning but don't crash
+        print(f"⚠️ Director signature not found at expected paths: {[str(p) for p in possible_paths if p]}")
+        return None
+        
+    except Exception as e:
+        print(f"⚠️ Error loading director signature: {e}")
+        return None
+
 
 @shared_task
 def send_contract_email(contract_id):
@@ -16,7 +48,7 @@ def send_contract_email(contract_id):
         subject = f'Contract for Signature - {contract.reference_code}'
         
         # Construct Signing Link
-        base_url = settings.FRONTEND_URL if hasattr(settings, 'FRONTEND_URL') else 'http://localhost:5173'
+        base_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
         signing_link = f"{base_url}/sign-contract/{contract.signing_token}/"
         
         html_message = render_to_string('contracts/email_contract.html', {
@@ -39,16 +71,33 @@ def send_contract_email(contract_id):
     except Exception as e:
         print(f"Error sending contract email: {e}")
 
+
 @shared_task
 def generate_signed_contract_pdf(contract_id):
     try:
         contract = Contract.objects.get(id=contract_id)
-        html_string = render_to_string('contracts/pdf_contract.html', {'contract': contract})
-        html = HTML(string=html_string)
-        pdf_file = html.write_pdf()
         
-        # Save PDF to media or send via email
-        # For this implementation, we will email it
+        # Get director signature as base64 for PDF embedding
+        director_sig_b64 = get_director_signature_base64()
+        
+        # Render template with base64 signature in context
+        html_string = render_to_string('contracts/pdf_contract.html', {
+            'contract': contract,
+            'director_signature_b64': director_sig_b64,  # <-- KEY ADDITION
+        })
+        
+        # Configure WeasyPrint to handle local file references if needed
+        html = HTML(string=html_string, base_url=settings.BASE_DIR)
+        
+        # Optional: Add CSS for print optimization
+        css = CSS(string='''
+            @page { size: A4; margin: 0; }
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        ''')
+        
+        pdf_file = html.write_pdf(stylesheets=[css] if css else None)
+        
+        # Email the signed contract
         subject = f'Signed Contract - {contract.reference_code}'
         html_message = render_to_string('contracts/email_signed_contract.html', {'contract': contract})
         
@@ -62,8 +111,25 @@ def generate_signed_contract_pdf(contract_id):
         email.attach(f'Contract_{contract.reference_code}.pdf', pdf_file, 'application/pdf')
         email.send()
         
+        # Log success
+        log_action.delay(
+            contract.created_by.id,
+            'CONTRACT_PDF_GENERATED',
+            f'PDF generated for signed contract: {contract.reference_code}',
+            metadata={'contract_id': contract.id}
+        )
+        
     except Exception as e:
-        print(f"Error generating contract PDF: {e}")
+        print(f"❌ Error generating contract PDF: {e}")
+        # Log the error for debugging
+        if hasattr(contract, 'created_by'):
+            log_action.delay(
+                contract.created_by.id,
+                'CONTRACT_PDF_ERROR',
+                f'PDF generation failed: {contract.reference_code} - {str(e)}',
+                metadata={'contract_id': contract_id, 'error': str(e)}
+            )
+
 
 @shared_task
 def generate_invoice_pdf(contract_id):
@@ -82,7 +148,7 @@ def generate_invoice_pdf(contract_id):
         )
         
         html_string = render_to_string('contracts/pdf_invoice.html', {'invoice': invoice})
-        html = HTML(string=html_string)
+        html = HTML(string=html_string, base_url=settings.BASE_DIR)
         pdf_file = html.write_pdf()
         
         subject = f'Invoice - {invoice.reference_code}'
@@ -103,5 +169,3 @@ def generate_invoice_pdf(contract_id):
         
     except Exception as e:
         print(f"Error generating invoice PDF: {e}")
-
-from audit.tasks import log_action
