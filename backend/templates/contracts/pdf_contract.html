@@ -23,7 +23,7 @@
             background-color: var(--secondary-cream);
             color: var(--text-dark);
             margin: 0;
-            padding: 40px 20px;
+            padding: 0; /* Remove padding for print */
             line-height: 1.6;
             font-size: 10.5pt;
         }
@@ -33,10 +33,13 @@
             max-width: 850px;
             margin: 0 auto;
             background: var(--white);
-            box-shadow: 0 10px 30px rgba(26, 77, 46, 0.15);
-            border-radius: 4px;
+            box-shadow: none; /* Remove shadow for PDF */
+            border-radius: 0;
             overflow: hidden;
             position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         .document-paper::before {
@@ -112,6 +115,7 @@
         /* --- CONTENT CONTAINER --- */
         .content-container {
             padding: 40px 50px;
+            flex: 1; /* Push footer to bottom */
         }
 
         /* --- PARTIES SECTION --- */
@@ -259,16 +263,18 @@
         .signature-line {
             border-bottom: 2px solid var(--text-dark);
             height: 70px;
-            position: relative;
+            position: relative; /* ✅ REQUIRED for absolute positioning of signature */
             margin-bottom: 10px;
         }
 
         .signature-image {
             max-height: 60px;
+            max-width: 300px; /* ✅ Prevent oversized signatures */
             width: auto;
             position: absolute;
             bottom: 5px;
             left: 0;
+            background: white; /* ✅ Help with transparent PNGs */
         }
 
         .sign-details {
@@ -277,19 +283,55 @@
             margin-top: 5px;
         }
 
-        /* --- FOOTER --- */
+        /* --- FOOTER (for HTML view only - WeasyPrint uses @page for PDF) --- */
         .footer-section {
             background-color: var(--primary-green);
             color: var(--white);
             padding: 20px 50px;
             text-align: center;
             font-size: 0.8em;
-            margin-top: 40px;
+            margin-top: auto; /* Push to bottom of flex container */
         }
 
         .footer-section p {
             margin: 5px 0;
             opacity: 0.9;
+        }
+
+        /* --- PAGE NUMBERING & FOOTER FOR PDF (WeasyPrint @page rules) --- */
+        @page {
+            size: A4;
+            margin: 0;
+            
+            /* Page numbering: "Page X of Y" at bottom center */
+            @bottom-center {
+                content: "Page " counter(page) " of " counter(pages);
+                font-size: 9pt;
+                color: var(--text-light);
+                padding-bottom: 10px;
+            }
+            
+            /* Footer content at bottom of every page */
+            @bottom-left {
+                content: "Dewlon Systems | Imara Daima, Nairobi";
+                font-size: 8pt;
+                color: var(--text-light);
+                padding-left: 50px;
+                padding-bottom: 10px;
+            }
+            @bottom-right {
+                content: "0728722746 | contact@dewlons.com";
+                font-size: 8pt;
+                color: var(--text-light);
+                padding-right: 50px;
+                padding-bottom: 10px;
+                text-align: right;
+            }
+        }
+
+        /* First page: different footer if needed (optional) */
+        @page :first {
+            /* Can customize first page footer here if desired */
         }
 
         /* --- PRINT OPTIMIZATION --- */
@@ -298,6 +340,7 @@
                 background: none; 
                 padding: 0; 
                 -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact;
                 font-size: 9.5pt;
             }
             .document-paper { 
@@ -306,12 +349,20 @@
                 width: 100%;
                 max-width: 100%;
                 margin: 0;
+                min-height: auto;
             }
-            .header, .content-container, .footer-section {
-                padding-left: 30px;
-                padding-right: 30px;
+            .header, .content-container {
+                padding-left: 50px;
+                padding-right: 50px;
+            }
+            .footer-section {
+                display: none; /* Hide HTML footer - WeasyPrint @page handles it */
             }
             .term-item {
+                page-break-inside: avoid;
+            }
+            /* Ensure signatures don't break across pages */
+            .signature-section {
                 page-break-inside: avoid;
             }
         }
@@ -321,11 +372,10 @@
 
     <div class="document-paper">
         
-        <!-- HEADER -->
+        <!-- HEADER (appears on first page only in PDF) -->
         <div class="header">
             <div class="company-branding">
                 <div class="logo-container">
-                    <!-- Logo: Use base64 or static path (WeasyPrint handles static with base_url) -->
                     <img src="{% static 'logo.png' %}" alt="Dewlon Systems Logo" onerror="this.style.display='none'">
                 </div>
                 <h1 class="company-name">Dewlon Systems</h1>
@@ -526,7 +576,7 @@
 
         </div>
 
-        <!-- FOOTER -->
+        <!-- FOOTER (HTML view only - hidden in PDF, replaced by @page footer) -->
         <div class="footer-section">
             <p><strong>Dewlon Systems</strong></p>
             <p>Imara Daima, Nairobi | 0728722746 | contact@dewlons.com</p>
